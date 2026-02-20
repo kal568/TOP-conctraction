@@ -1,10 +1,59 @@
-body { font-family: Arial; background:#f4f6f9; padding:20px; }
-.container { max-width: 1200px; margin:auto; }
-h1 { color:#2c3e50; text-align:center; }
-.card { background:white; padding:15px; margin-bottom:15px; border-radius:8px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
-button { padding:8px 15px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer; }
-input, select { padding:6px; margin:5px 0; width:100%; border-radius:5px; border:1px solid #ccc; }
-.deleteBtn { background:red; color:white; margin-left:10px; }
-.loginCard { background:white; color:black; padding:30px; border-radius:15px; width:300px; text-align:center; margin:auto; margin-top:100px; }
-#dashboard { display:none; }
-#loginBox { height:100vh; display:flex; justify-content:center; align-items:center; }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f9;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+h1, h2, h3 {
+  margin: 0 0 10px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}

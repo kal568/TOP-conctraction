@@ -2,141 +2,90 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Construction Dashboard</title>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
-}
-
-header {
-    background: #2c3e50;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 22px;
-}
-
-.container {
-    width: 90%;
-    margin: 20px auto;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-input, select, button {
-    padding: 8px;
-    margin: 5px 0;
-    width: 100%;
-}
-
-button {
-    background: #3498db;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #2980b9;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 8px;
-    text-align: center;
-}
-</style>
-
+<title>TOP Construction Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" />
 </head>
 <body>
 
-<header>🏗 CONSTRUCTION Dashboard</header>
-
-<div class="container">
-
-    <div class="card">
-        <h3>Add Worker</h3>
-        <input type="text" id="workerName" placeholder="Enter Worker Name">
-        <button onclick="addWorker()">Add Worker</button>
-        <ul id="workerList"></ul>
-    </div>
-
-    <div class="card">
-        <h3>Payroll System</h3>
-        <input type="text" id="payWorker" placeholder="Worker Name">
-        <input type="number" id="wage" placeholder="Daily Wage">
-        <input type="number" id="days" placeholder="Days Worked">
-        <button onclick="addPayroll()">Add Payroll</button>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Wage</th>
-                    <th>Days</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody id="payrollTable"></tbody>
-        </table>
-    </div>
-
+<div id="loginBox">
+  <div class="loginCard">
+    <h2>🔐 Admin Login</h2>
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="login()">Login</button>
+  </div>
 </div>
 
-<script>
-function addWorker() {
-    let name = document.getElementById("workerName").value;
-    if(name === "") return;
+<div id="dashboard" class="container">
+  <h1>🏗TOP CONSTRUCTION Dashboard</h1>
 
-    let li = document.createElement("li");
-    li.textContent = name;
-    document.getElementById("workerList").appendChild(li);
+  <div class="card">
+    <h3>Workers Management</h3>
+    <input type="text" id="newWorker" placeholder="Enter Worker Name">
+    <button onclick="addWorker()">Add Worker</button>
+    <ul id="workerList"></ul>
+  </div>
 
-    document.getElementById("workerName").value = "";
-}
+  <div class="card">
+    <h3>Daily Task Submission</h3>
+    <label>Project
+      <select id="project">
+        <option>Project 1</option>
+        <option>Project 2</option>
+      </select>
+    </label>
+    <label>Worker
+      <select id="worker"></select>
+    </label>
+    <label>Category
+      <select id="category">
+        <option>Emergency</option>
+        <option>Consumable</option>
+        <option>Ordered Items</option>
+      </select>
+    </label>
+    <label>Quantity
+      <input type="number" id="quantity">
+    </label>
+    <button onclick="submitTask()">Submit</button>
+  </div>
 
-function addPayroll() {
-    let name = document.getElementById("payWorker").value;
-    let wage = document.getElementById("wage").value;
-    let days = document.getElementById("days").value;
+  <div class="card">
+    <h3>Submitted Tasks</h3>
+    <ul id="taskList"></ul>
+  </div>
 
-    if(name === "" || wage === "" || days === "") return;
+  <div class="card">
+    <h3>Payroll System</h3>
+    <select id="projectSelect">
+      <option>Project 1</option>
+      <option>Project 2</option>
+      <option>Project 3</option>
+    </select>
+    <input type="text" id="name" placeholder="Worker Name">
+    <input type="number" id="rate" placeholder="Daily Wage">
+    <input type="number" id="days" placeholder="Days Worked">
+    <button onclick="addPayroll()">Add Worker</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th><th>Name</th><th>Wage</th><th>Days</th><th>Total</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <button onclick="exportPDF()">Export PDF</button>
+  </div>
 
-    let total = wage * days;
+  <div class="card">
+    <h3>📊 Weekly Task Report</h3>
+    <canvas id="taskChart"></canvas>
+  </div>
+</div>
 
-    let row = `<tr>
-        <td>${name}</td>
-        <td>${wage}</td>
-        <td>${days}</td>
-        <td>${total}</td>
-    </tr>`;
-
-    document.getElementById("payrollTable").innerHTML += row;
-
-    document.getElementById("payWorker").value = "";
-    document.getElementById("wage").value = "";
-    document.getElementById("days").value = "";
-}
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
