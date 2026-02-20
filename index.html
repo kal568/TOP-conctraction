@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+
+header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.container {
+    width: 90%;
+    margin: 20px auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+input, select, button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+}
+
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+}
+</style>
+
+</head>
+<body>
+
+<header>🏗 CONSTRUCTION Dashboard</header>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Add Worker</h3>
+        <input type="text" id="workerName" placeholder="Enter Worker Name">
+        <button onclick="addWorker()">Add Worker</button>
+        <ul id="workerList"></ul>
+    </div>
+
+    <div class="card">
+        <h3>Payroll System</h3>
+        <input type="text" id="payWorker" placeholder="Worker Name">
+        <input type="number" id="wage" placeholder="Daily Wage">
+        <input type="number" id="days" placeholder="Days Worked">
+        <button onclick="addPayroll()">Add Payroll</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Wage</th>
+                    <th>Days</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="payrollTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function addWorker() {
+    let name = document.getElementById("workerName").value;
+    if(name === "") return;
+
+    let li = document.createElement("li");
+    li.textContent = name;
+    document.getElementById("workerList").appendChild(li);
+
+    document.getElementById("workerName").value = "";
+}
+
+function addPayroll() {
+    let name = document.getElementById("payWorker").value;
+    let wage = document.getElementById("wage").value;
+    let days = document.getElementById("days").value;
+
+    if(name === "" || wage === "" || days === "") return;
+
+    let total = wage * days;
+
+    let row = `<tr>
+        <td>${name}</td>
+        <td>${wage}</td>
+        <td>${days}</td>
+        <td>${total}</td>
+    </tr>`;
+
+    document.getElementById("payrollTable").innerHTML += row;
+
+    document.getElementById("payWorker").value = "";
+    document.getElementById("wage").value = "";
+    document.getElementById("days").value = "";
+}
+</script>
+
+</body>
+</html>
