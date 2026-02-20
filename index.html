@@ -1,91 +1,767 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>TOP Construction Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" />
+<title>Construction Dashboard</title>
+<style>
+body {font-family: Arial; background:#f4f6f9; padding:20px;}
+h1 {color:#2c3e50;}
+.card {background:white; padding:15px; margin-bottom:15px; border-radius:8px;}
+button {padding:6px 12px; background:#3498db; color:white; border:none; border-radius:5px; margin-top:5px;}
+input, select {padding:6px; margin:5px 0; width:100%;}
+li {margin:5px 0;}
+.deleteBtn {background:red; margin-left:10px;}
+</style>
 </head>
 <body>
 
-<div id="loginBox">
-  <div class="loginCard">
-    <h2>🔐 Admin Login</h2>
-    <input type="password" id="password" placeholder="Enter Password">
-    <button onclick="login()">Login</button>
-  </div>
+<h1>🏗 CONSTRUCTION Dashboard</h1>
+
+<!-- WORKER MANAGEMENT -->
+<div class="card">
+<h3>Workers Management</h3>
+
+<input type="text" id="newWorker" placeholder="Enter worker name">
+<button onclick="addWorker()">Add Worker</button>
+
+<ul id="workerList"></ul>
 </div>
 
-<div id="dashboard" class="container">
-  <h1>🏗TOP CONSTRUCTION Dashboard</h1>
+<!-- DAILY TASK -->
+<div class="card">
+<h3>Daily Task Submission</h3>
 
-  <div class="card">
-    <h3>Workers Management</h3>
-    <input type="text" id="newWorker" placeholder="Enter Worker Name">
-    <button onclick="addWorker()">Add Worker</button>
-    <ul id="workerList"></ul>
-  </div>
+<label>Project</label>
+<select id="project">
+<option>Project 1</option>
+<option>Project 2</option>
+</select>
 
-  <div class="card">
-    <h3>Daily Task Submission</h3>
-    <label>Project
-      <select id="project">
-        <option>Project 1</option>
-        <option>Project 2</option>
-      </select>
-    </label>
-    <label>Worker
-      <select id="worker"></select>
-    </label>
-    <label>Category
-      <select id="category">
-        <option>Emergency</option>
-        <option>Consumable</option>
-        <option>Ordered Items</option>
-      </select>
-    </label>
-    <label>Quantity
-      <input type="number" id="quantity">
-    </label>
-    <button onclick="submitTask()">Submit</button>
-  </div>
+<label>Worker</label>
+<select id="worker"></select>
 
-  <div class="card">
-    <h3>Submitted Tasks</h3>
-    <ul id="taskList"></ul>
-  </div>
+<label>Category</label>
+<select id="category">
+<option>Emergency</option>
+<option>Consumable</option>
+<option>Ordered Items</option>
+</select>
 
-  <div class="card">
-    <h3>Payroll System</h3>
-    <select id="projectSelect">
-      <option>Project 1</option>
-      <option>Project 2</option>
-      <option>Project 3</option>
-    </select>
-    <input type="text" id="name" placeholder="Worker Name">
-    <input type="number" id="rate" placeholder="Daily Wage">
-    <input type="number" id="days" placeholder="Days Worked">
-    <button onclick="addPayroll()">Add Worker</button>
-    <table>
-      <thead>
-        <tr>
-          <th>Project</th><th>Name</th><th>Wage</th><th>Days</th><th>Total</th><th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <button onclick="exportPDF()">Export PDF</button>
-  </div>
+<label>Quantity</label>
+<input type="number" id="quantity">
 
-  <div class="card">
-    <h3>📊 Weekly Task Report</h3>
-    <canvas id="taskChart"></canvas>
-  </div>
+<button onclick="submitTask()">Submit</button>
 </div>
+
+<div class="card">
+<h3>Submitted Tasks</h3>
+<ul id="taskList"></ul>
+</div>
+
+<script>
+
+// WORKERS
+function addWorker(){
+let name=document.getElementById("newWorker").value;
+if(name==""){alert("Enter worker name"); return;}
+
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+workers.push(name);
+localStorage.setItem("workers",JSON.stringify(workers));
+
+document.getElementById("newWorker").value="";
+displayWorkers();
+loadWorkersToDropdown();
+}
+
+function deleteWorker(index){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+workers.splice(index,1);
+localStorage.setItem("workers",JSON.stringify(workers));
+displayWorkers();
+loadWorkersToDropdown();
+}
+
+function displayWorkers(){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+let list=document.getElementById("workerList");
+list.innerHTML="";
+workers.forEach(function(w,i){
+let li=document.createElement("li");
+li.textContent=w;
+
+let del=document.createElement("button");
+del.textContent="Delete";
+del.className="deleteBtn";
+del.onclick=function(){deleteWorker(i);};
+
+li.appendChild(del);
+list.appendChild(li);
+});
+}
+
+function loadWorkersToDropdown(){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+let select=document.getElementById("worker");
+select.innerHTML="";
+workers.forEach(function(w){
+let option=document.createElement("option");
+option.textContent=w;
+select.appendChild(option);
+});
+}
+
+// DAILY TASK
+function submitTask(){
+let project=document.getElementById("project").value;
+let worker=document.getElementById("worker").value;
+let category=document.getElementById("category").value;
+let quantity=document.getElementById("quantity").value;
+
+if(quantity==""||worker==""){alert("Fill all fields"); return;}
+
+let task=project+" | "+worker+" | "+category+" | Qty:"+quantity;
+
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+tasks.push(task);
+localStorage.setItem("tasks",JSON.stringify(tasks));
+
+displayTasks();
+document.getElementById("quantity").value="";
+}
+
+function displayTasks(){
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let list=document.getElementById("taskList");
+list.innerHTML="";
+tasks.forEach(function(t){
+let li=document.createElement("li");
+li.textContent=t;
+list.appendChild(li);
+});
+}
+
+displayWorkers();
+loadWorkersToDropdown();
+displayTasks();
+
+</script>
+
+</body>
+</html>function backupData(){
+
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+let allData={
+workers:workers,
+tasks:tasks
+};
+
+let dataStr="data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+
+let download=document.createElement("a");
+download.setAttribute("href",dataStr);
+download.setAttribute("download","construction_backup.json");
+document.body.appendChild(download);
+download.click();
+download.remove();
+}<button onclick="backupData()">Backup Save All Data</button><button onclick="backupData()">Backup Save All Data</button><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TOP CONSTRUCTION Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+</head>
+<body>
+<header class="top-bar">
+<div class="logo">TOP CONSTRUCTION</div>
+<button id="lang-toggle">Amharic / English</button>
+</header>
+
+<aside class="sidebar">
+<ul>
+<li>Dashboard</li>
+<li>Workers</li>
+<li>Projects</li>
+<li>Daily Tasks</li>
+<li>Reports</li>
+<li>Payroll</li>
+<li>Settings</li>
+</ul>
+</aside>
+
+<main class="main-content">
+<section class="top-companies">
+<h2>Top Companies</h2>
+<div class="company-cards">
+<div class="card">Top 1</div>
+<div class="card">Top 2</div>
+<div class="card">Top 3</div>
+<div class="card">Top 4</div>
+<div class="card">Top 5</div>
+<div class="card">Top 6</div>
+</div>
+</section>
+
+<section class="daily-task">
+<h2>Daily Task Submission</h2>
+<form id="task-form">
+<label>Project: <select><option>Project 1</option><option>Project 2</option></select></label>
+<label>Worker: <select><option>Worker 1</option><option>Worker 2</option></select></label>
+<label>Category: <select><option>Emergency</option><option>Consumable</option><option>Ordered Items</option></select></label>
+<label>Quantity: <input type="number"></label>
+<label>Status: <select><option>Pending</option><option>Completed</option></select></label>
+<div class="dropzone" id="taskPhotos"></div>
+<button type="submit">Submit</button>
+</form>
+</section>
+
+<section class="charts">
+<h2>Weekly Project Progress</h2>
+<canvas id="progressChart" width="400" height="200"></canvas>
+</section>
+</main>
 
 <script src="script.js"></script>
 </body>
-</html>
+</html><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Construction Dashboard</title>
+<style>
+body{
+font-family:Arial;
+margin:0;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+color:white;
+}
+
+.container{
+padding:20px;
+}
+
+.card{
+background:white;
+color:black;
+padding:15px;
+margin-bottom:15px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+}
+
+h1{text-align:center;}
+
+button{
+padding:8px 15px;
+background:#2a5298;
+color:white;
+border:none;
+border-radius:6px;
+margin-top:5px;
+}
+
+input,select{
+padding:8px;
+margin:5px 0;
+width:100%;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.deleteBtn{background:red;}
+
+#dashboard{display:none;}
+#loginBox{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.loginCard{
+background:white;
+color:black;
+padding:30px;
+border-radius:15px;
+width:300px;
+text-align:center;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginBox">
+<div class="loginCard">
+<h2>🔐 Admin Login</h2>
+<input type="password" id="password" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="container">
+
+<h1>🏗 CONSTRUCTION Dashboard</h1>
+
+<div class="card">
+<h3>Add Worker</h3>
+<input type="text" id="newWorker" placeholder="Worker Name">
+<button onclick="addWorker()">Add Worker</button>
+<ul id="workerList"></ul>
+</div>
+
+<div class="card">
+<h3>Daily Task</h3>
+
+<select id="project">
+<option>Project 1</option>
+<option>Project 2</option>
+</select>
+
+<select id="worker"></select>
+
+<select id="category">
+<option>Emergency</option>
+<option>Consumable</option>
+<option>Ordered</option>
+</select>
+
+<input type="number" id="quantity" placeholder="Quantity">
+
+<button onclick="submitTask()">Submit Task</button>
+
+<h4>Submitted Tasks</h4>
+<ul id="taskList"></ul>
+</div>
+
+</div>
+
+<script>
+
+const ADMIN_PASSWORD="1234";
+
+function login(){
+let pass=document.getElementById("password").value;
+if(pass===ADMIN_PASSWORD){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("dashboard").style.display="block";
+}else{
+alert("Wrong Password");
+}
+}
+
+// WORKERS
+function addWorker(){
+let name=document.getElementById("newWorker").value;
+if(name==""){alert("Enter name"); return;}
+
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+workers.push(name);
+localStorage.setItem("workers",JSON.stringify(workers));
+document.getElementById("newWorker").value="";
+displayWorkers();
+loadWorkers();
+}
+
+function deleteWorker(i){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+workers.splice(i,1);
+localStorage.setItem("workers",JSON.stringify(workers));
+displayWorkers();
+loadWorkers();
+}
+
+function displayWorkers(){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+let list=document.getElementById("workerList");
+list.innerHTML="";
+workers.forEach(function(w,i){
+let li=document.createElement("li");
+li.textContent=w;
+let del=document.createElement("button");
+del.textContent="X";
+del.className="deleteBtn";
+del.onclick=function(){deleteWorker(i);};
+li.appendChild(del);
+list.appendChild(li);
+});
+}
+
+function loadWorkers(){
+let workers=JSON.parse(localStorage.getItem("workers"))||[];
+let select=document.getElementById("worker");
+select.innerHTML="";
+workers.forEach(function(w){
+let opt=document.createElement("option");
+opt.textContent=w;
+select.appendChild(opt);
+});
+}
+
+// TASKS
+function submitTask(){
+let project=document.getElementById("project").value;
+let worker=document.getElementById("worker").value;
+let category=document.getElementById("category").value;
+let quantity=document.getElementById("quantity").value;
+
+if(quantity==""){alert("Enter quantity"); return;}
+
+let task=project+" | "+worker+" | "+category+" | "+quantity;
+
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+tasks.push(task);
+localStorage.setItem("tasks",JSON.stringify(tasks));
+
+displayTasks();
+document.getElementById("quantity").value="";
+}
+
+function displayTasks(){
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let list=document.getElementById("taskList");
+list.innerHTML="";
+tasks.forEach(function(t){
+let li=document.createElement("li");
+li.textContent=t;
+list.appendChild(li);
+});
+}
+
+displayWorkers();
+loadWorkers();
+displayTasks();
+
+</script>
+
+</body>
+</html>1234<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><div class="card">
+<h3>📊 Weekly Task Report</h3>
+<canvas id="taskChart"></canvas>
+</div><div class="card">
+<h3>📊 Weekly Task Report</h3>
+<canvas id="taskChart"></canvas>
+</div>function updateChart(){
+
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+let project1=0;
+let project2=0;
+
+tasks.forEach(function(t){
+if(t.includes("Project 1")) project1++;
+if(t.includes("Project 2")) project2++;
+});
+
+let ctx=document.getElementById("taskChart").getContext("2d");
+
+new Chart(ctx,{
+type:"bar",
+data:{
+labels:["Project 1","Project 2"],
+datasets:[{
+label:"Total Tasks",
+data:[project1,project2],
+backgroundColor:["#2a5298","#1e3c72"]
+}]
+}
+});
+}
+
+updateChart();updateChart();<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Construction Dashboard</title>
+<style>
+body {font-family: Arial; background:#f4f6f9; padding:20px;}
+h1 {color:#2c3e50;}
+.card {background:white; padding:15px; margin-bottom:15px; border-radius:8px;}
+button {padding:8px 15px; background:#3498db; color:white; border:none; border-radius:5px;}
+input, select {padding:6px; margin:5px 0; width:100%;}
+</style>
+</head>
+<body>
+
+<h1>🏗 CONSTRUCTION Dashboard</h1>
+
+<div class="card">
+<h3>Daily Task Submission</h3>
+
+<label>Project</label>
+<select id="project">
+<option>Project 1</option>
+<option>Project 2</option>
+</select>
+
+<label>Worker</label>
+<select id="worker">
+<option>Worker 1</option>
+<option>Worker 2</option>
+</select>
+
+<label>Category</label>
+<select id="category">
+<option>Emergency</option>
+<option>Consumable</option>
+<option>Ordered Items</option>
+</select>
+
+<label>Quantity</label>
+<input type="number" id="quantity">
+
+<button onclick="submitTask()">Submit</button>
+</div>
+
+<div class="card">
+<h3>Submitted Tasks</h3>
+<ul id="taskList"></ul>
+</div>
+
+<script>
+function submitTask(){
+let project=document.getElementById("project").value;
+let worker=document.getElementById("worker").value;
+let category=document.getElementById("category").value;
+let quantity=document.getElementById("quantity").value;
+
+if(quantity==""){alert("Enter Quantity"); return;}
+
+let task=project+" | "+worker+" | "+category+" | Qty:"+quantity;
+
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+tasks.push(task);
+localStorage.setItem("tasks",JSON.stringify(tasks));
+
+displayTasks();
+document.getElementById("quantity").value="";
+}
+
+function displayTasks(){
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let list=document.getElementById("taskList");
+list.innerHTML="";
+tasks.forEach(function(t){
+let li=document.createElement("li");
+li.textContent=t;
+list.appendChild(li);
+});
+}
+
+displayTasks();
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Payroll System</title>
+<style>
+body { font-family: Arial; padding:20px; background:#f4f4f4; }
+input, button { padding:8px; margin:5px; }
+table { width:100%; margin-top:20px; border-collapse:collapse; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+button { background:green; color:white; border:none; }
+.delete { background:red; }
+</style>
+</head>
+<body>
+
+<h2>Payroll System</h2>
+
+<input type="text" id="name" placeholder="Worker Name">
+<input type="number" id="rate" placeholder="Daily Wage">
+<input type="number" id="days" placeholder="Days Worked">
+<button onclick="addWorker()">Add</button>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Daily Wage</th>
+<th>Days</th>
+<th>Total</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<h3 id="grandTotal"></h3>
+
+<script>
+let workers = JSON.parse(localStorage.getItem("workers")) || [];
+
+function saveData() {
+localStorage.setItem("workers", JSON.stringify(workers));
+}
+
+function render() {
+let table = document.getElementById("tableBody");
+table.innerHTML = "";
+let totalSum = 0;
+
+workers.forEach((w, index) => {
+let total = w.rate * w.days;
+totalSum += total;
+
+table.innerHTML += `
+<tr>
+<td>${w.name}</td>
+<td>${w.rate}</td>
+<td>${w.days}</td>
+<td>${total}</td>
+<td><button class="delete" onclick="deleteWorker(${index})">Delete</button></td>
+</tr>
+`;
+});
+
+document.getElementById("grandTotal").innerText = "Grand Total: " + totalSum;
+}
+
+function addWorker() {
+let name = document.getElementById("name").value;
+let rate = parseFloat(document.getElementById("rate").value);
+let days = parseFloat(document.getElementById("days").value);
+
+if(!name || !rate || !days) return alert("Fill all fields");
+
+workers.push({name, rate, days});
+saveData();
+render();
+
+document.getElementById("name").value="";
+document.getElementById("rate").value="";
+document.getElementById("days").value="";
+}
+
+function deleteWorker(index){
+workers.splice(index,1);
+saveData();
+render();
+}
+
+render();
+</script>
+
+</body>
+</html><!-- Add this inside the <script> tag of payroll.html -->
+
+function editWorker(index){
+  let w = workers[index];
+  let name = prompt("Edit Name:", w.name);
+  if(name === null) return;
+  let rate = prompt("Edit Daily Wage:", w.rate);
+  if(rate === null) return;
+  let days = prompt("Edit Days Worked:", w.days);
+  if(days === null) return;
+
+  workers[index] = {name, rate: parseFloat(rate), days: parseFloat(days)};
+  saveData();
+  render();
+}<td>
+<button class="delete" onclick="deleteWorker(${index})">Delete</button>
+<button onclick="editWorker(${index})">Edit</button>
+</td><button onclick="exportPDF()">Export PDF</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.setFontSize(14);
+  doc.text("Payroll Report", 14, 20);
+
+  let startY = 30;
+  workers.forEach((w, i) => {
+    let total = w.rate * w.days;
+    doc.text(`${i+1}. ${w.name} - Wage: ${w.rate} - Days: ${w.days} - Total: ${total}`, 14, startY);
+    startY += 10;
+  });
+
+  let grandTotal = workers.reduce((sum, w) => sum + w.rate * w.days, 0);
+  doc.text("Grand Total: " + grandTotal, 14, startY + 10);
+
+  doc.save("Payroll_Report.pdf");
+}
+</script><!-- Project Selector -->
+<select id="projectSelect">
+  <option value="Project 1">Project 1</option>
+  <option value="Project 2">Project 2</option>
+  <option value="Project 3">Project 3</option>
+</select>
+
+<input type="text" id="name" placeholder="Worker Name">
+<input type="number" id="rate" placeholder="Daily Wage">
+<input type="number" id="days" placeholder="Days Worked">
+<button onclick="addWorker()">Add Worker</button>
+
+<table>
+<thead>
+<tr>
+<th>Project</th><th>Name</th><th>Wage</th><th>Days</th><th>Total</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let workers = JSON.parse(localStorage.getItem("workers")) || [];
+
+function saveData(){ localStorage.setItem("workers", JSON.stringify(workers)); }
+
+function render(){
+  let table = document.getElementById("tableBody"); table.innerHTML="";
+  let totalSum=0;
+  workers.forEach((w, i)=>{
+    let total = w.rate*w.days; totalSum+=total;
+    table.innerHTML+=`
+      <tr>
+        <td>${w.project}</td>
+        <td>${w.name}</td>
+        <td>${w.rate}</td>
+        <td>${w.days}</td>
+        <td>${total}</td>
+        <td>
+          <button onclick="editWorker(${i})">Edit</button>
+          <button onclick="deleteWorker(${i})">Delete</button>
+        </td>
+      </tr>`;
+  });
+}
+
+function addWorker(){
+  let project = document.getElementById("projectSelect").value;
+  let name = document.getElementById("name").value;
+  let rate = parseFloat(document.getElementById("rate").value);
+  let days = parseFloat(document.getElementById("days").value);
+  if(!name || !rate || !days) return alert("Fill all fields");
+
+  workers.push({project, name, rate, days});
+  saveData(); render();
+  document.getElementById("name").value="";
+  document.getElementById("rate").value="";
+  document.getElementById("days").value="";
+}
+
+function editWorker(index){
+  let w = workers[index];
+  let name = prompt("Edit Name:", w.name); if(name===null) return;
+  let rate = prompt("Edit Daily Wage:", w.rate); if(rate===null) return;
+  let days = prompt("Edit Days Worked:", w.days); if(days===null) return;
+  workers[index] = {project: w.project, name, rate: parseFloat(rate), days: parseFloat(days)};
+  saveData(); render();
+}
+
+function deleteWorker(index){ workers.splice(index,1); saveData(); render(); }
+
+render();
+</script>
