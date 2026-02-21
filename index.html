@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOP Conctraction</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginBox" class="login-box">
+    <h2>TOP Conctraction</h2>
+    <input type="password" id="password" placeholder="Admin Password">
+    <button onclick="loginAdmin()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+<h1>TOP Conctraction Dashboard</h1>
+
+<section>
+<h3>Add Worker</h3>
+<input type="text" id="newWorker" placeholder="Worker Name">
+<button onclick="addWorker()">Add</button>
+<ul id="workerList"></ul>
+</section>
+
+<section>
+<h3>Add Task</h3>
+<select id="project">
+<option>Project 1</option>
+<option>Project 2</option>
+</select>
+
+<select id="workerSelect"></select>
+
+<select id="category">
+<option>Excavation</option>
+<option>Concrete</option>
+<option>Finishing</option>
+</select>
+
+<input type="number" id="quantity" placeholder="Quantity">
+<button onclick="submitTask()">Submit</button>
+
+<ul id="taskList"></ul>
+</section>
+
+<section>
+<h3>Payroll</h3>
+<input type="text" id="name" placeholder="Worker Name">
+<input type="number" id="rate" placeholder="Daily Rate">
+<input type="number" id="days" placeholder="Days Worked">
+<button onclick="addPayroll()">Add</button>
+
+<table border="1">
+<thead>
+<tr>
+<th>Name</th>
+<th>Rate</th>
+<th>Days</th>
+<th>Total</th>
+<th>Delete</th>
+</tr>
+</thead>
+<tbody id="payrollBody"></tbody>
+</table>
+
+<button onclick="backupData()">Backup Data</button>
+</section>
+
+<section>
+<h3>Project Chart</h3>
+<canvas id="taskChart"></canvas>
+</section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
